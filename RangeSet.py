@@ -42,30 +42,3 @@ def removedContacts(list):
 	else:
 		return list[:2] + removedContacts(list[2:])
 
-
-if __name__ == '__main__':
-	import sys
-	sys.setrecursionlimit(1000000)
-	#rangeSet = RangeSet()
-	#for i in range(1000):
-	#	print "start?"
-	#	start = int(raw_input())
-	#	print "end?"
-	#	end = int(raw_input())
-	#	rangeSet.insert(start, end)
-	#	print rangeSet.normalizedlist
-	bedlines = open("data/chr1_bed", "r").readlines()
-	bedRangelist = []
-	for line in bedlines:
-		splitedline = line.strip("\n").split("\t")
-		start = int(splitedline[0])
-		end = int(splitedline[1])
-		bedRangelist.append([start,end])
-	print bedRangelist[:10]
-	bedRangeSet = RangeSet(bedRangelist)
-	print bedRangeSet.normalizedlist[:10]
-	print len(bedRangeSet.normalizedlist)
-	filtered = removedContacts(bedRangeSet.normalizedlist)
-	print "filtered"
-	print filtered[:10]
-	print len(filtered)
