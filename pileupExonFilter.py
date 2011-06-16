@@ -40,9 +40,8 @@ def positionInExon(chr, position , exonRangeSet):
 
 def pileupExonFilter(pileupfileobj, exonRangeSet):
 	pileupfileobj.seek(0)
-	pileuplines = pileupfileobj.readlines()
 	filteredlines = []
-	for line in pileuplines:
+	for line in pileupfileobj:
 		splitedline = line.strip("\n").split("\t")
 		chr = splitedline[0].strip()
 		position = int(splitedline[1]) - 1 #pileup to bed format
@@ -52,11 +51,14 @@ def pileupExonFilter(pileupfileobj, exonRangeSet):
 
 if __name__ == "__main__":
 	import sys
+	usage = "Usage: pileupExonFilter.py bedfile in_pileup > out_pileup"
+	if len(sys.argv) != 3:
+		print usage
+		exit(1)
 	bedFN = sys.argv[1]
 	exonDict = createExonDictionary(open(bedFN,"r"))
 	exonRangeSet = createExonRangeSet(exonDict)
 	pileupFN = sys.argv[2]
 	res = pileupExonFilter(open(pileupFN,"r"),exonRangeSet)
-
 	for line in res:
 		print line.strip("\n")
