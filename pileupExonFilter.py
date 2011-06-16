@@ -6,9 +6,8 @@ def lineBeginWithChr(line):
 
 def createExonDictionary(fileobj):
 	fileobj.seek(0)
-	lines = fileobj.readlines()
 	res = {}
-	for line in lines:
+	for line in fileobj:
 		if lineBeginWithChr(line):
 			splitedline = line.strip("\n").split("\t")
 			try:
@@ -39,15 +38,19 @@ def positionInExon(chr, position , exonRangeSet):
 		return False
 
 def pileupExonFilter(pileupfileobj, exonRangeSet):
+	import sys
 	pileupfileobj.seek(0)
-	filteredlines = []
 	for line in pileupfileobj:
 		splitedline = line.strip("\n").split("\t")
-		chr = splitedline[0].strip()
-		position = int(splitedline[1]) - 1 #pileup to bed format
+		try:
+			chr = splitedline[0].strip()
+			position = int(splitedline[1]) - 1 #pileup2bed position
+		except (IndexError, ValueError):
+			print "ERROR: Unexpected format in pileup."
+			print line
+			raise
 		if positionInExon(chr, position, exonRangeSet):
-			filteredlines.append(line)
-	return filteredlines
+			sys.stdout.write(line)
 
 if __name__ == "__main__":
 	import sys
@@ -59,6 +62,4 @@ if __name__ == "__main__":
 	exonDict = createExonDictionary(open(bedFN,"r"))
 	exonRangeSet = createExonRangeSet(exonDict)
 	pileupFN = sys.argv[2]
-	res = pileupExonFilter(open(pileupFN,"r"),exonRangeSet)
-	for line in res:
-		print line.strip("\n")
+	pileupExonFilter(open(pileupFN,"r"),exonRangeSet)
