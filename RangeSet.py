@@ -12,23 +12,18 @@ class RangeSet:
 		if start == end:
 			return
 		elif start > end:
-			tmp = end
-			end = start
-			start = tmp
-
+			start, end = end, start
+		
 		startIndex = bisect.bisect(self.normalizedlist, start)
 		endIndex = bisect.bisect(self.normalizedlist, end)
 		insortingValues = []
-		for l in self.normalizedlist[startIndex: endIndex]:
-			insortingValues.append(l)
-		if start in self:
+		if start not in self:
 			insortingValues.append(start)
-		if end in self:
+		if end not in self:
 			insortingValues.append(end)
+		del self.normalizedlist[startIndex: endIndex]
 		for value in insortingValues:
 			bisect.insort(self.normalizedlist, value)
-		bisect.insort(self.normalizedlist, start)
-		bisect.insort(self.normalizedlist, end)
 
 def removedContacts(list):
 	start = list[0]
@@ -42,3 +37,22 @@ def removedContacts(list):
 	else:
 		return list[:2] + removedContacts(list[2:])
 
+if __name__ == "__main__":
+	rangeSet = RangeSet()
+	while True:
+		try:
+			start = int(raw_input("start: "))
+			end = int(raw_input("end: "))
+		except ValueError:
+			print "please input integer value"
+			start, end = 0, 0
+		rangeSet.insert(start, end)
+		print rangeSet.normalizedlist
+		try:
+			value = int(raw_input("value: ")) 
+			if value in rangeSet:
+				print value, "insides rangeSet"
+			else:
+				print value, "outsides rangeSet"
+		except ValueError:
+			pass
