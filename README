@@ -1,0 +1,3 @@
+script: pileupExonFilter.py
+usage: python pileExonFilter.py bedfile in_pileup > out_pileup
+function: passes lines in in_pileup which position is inside exon ranges which is specified by bedfile.
