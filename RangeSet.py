@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import bisect
 class RangeSet:
 	def __init__(self, rangelist = []):
