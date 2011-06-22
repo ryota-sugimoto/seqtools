@@ -1,5 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 USAGE="usage: fq2bam 1st_Seq.txt 2nd_Seq.txt [output_prefix]"
+
 if (( $# == 0 ))
 then
     echo "${USAGE}"
