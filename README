@@ -7,3 +7,7 @@ script: RangeSet.py
 usage: class file
 function: create range set. create normalized range list internally, and allows to determine that requested position is insided or not as O(logn) speed.
 dependency: python
+#
+script: fastqUnpairedFilter.py
+usage: remove Unpaired read from pair fastq sequence files.
+dependency: python
