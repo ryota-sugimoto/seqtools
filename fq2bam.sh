@@ -78,7 +78,7 @@ then
     mv "${OUT}${PILEUPFN}" "${OUT}${3}.${PILEUPFN}"
 fi
 
-pileupFilter.awk "${OUT}${3}.${PILEUPFN}" \
-                        > "${OUT}${3}.filtered.${PILEUPFN}"
+awk '( $6 >= 20 ) && ( $8 >= 20 ){ print }' "${OUT}${3}.${PILEUPFN}" \
+                                          > "${OUT}${3}.filtered.${PILEUPFN}"
 
 echo "fq2bam.sh: complete"
