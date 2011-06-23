@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-USAGE="usage: fq2bam.sh 1st_Seq.txt 2nd_Seq.txt [output_prefix]"
+USAGE="usage: fq2bam.sh in_seq_1 in_seq_2"
 if (( $# == 0 ))
 then
     echo "${USAGE}"
@@ -71,14 +71,7 @@ samtools index "${OUT}${SORTEDBAMFN}.bam"
 PILEUPFN="${FILE1/_?_sequence.txt/_sequence}.pileup"
 samtools pileup -cf "${REFERENCE}" "${OUT}${SORTEDBAMFN}.bam" > "${OUT}${PILEUPFN}"
 
-if (( $# == 3 ))
-then
-    mv "${OUT}${BAMFN}" "${OUT}${3}.${BAMFN}"
-    mv "${OUT}${SORTEDBAMFN}.bam" "${OUT}${3}.${SORTEDBAMFN}.bam"
-    mv "${OUT}${PILEUPFN}" "${OUT}${3}.${PILEUPFN}"
-fi
-
-awk '( $6 >= 20 ) && ( $8 >= 20 ){ print }' "${OUT}${3}.${PILEUPFN}" \
-                                          > "${OUT}${3}.filtered.${PILEUPFN}"
+awk '( $6 >= 20 ) && ( $8 >= 20 ){ print }' "${OUT}${PILEUPFN}" \
+                                          > "${OUT}filtered.${PILEUPFN}"
 
 echo "fq2bam.sh: complete"
