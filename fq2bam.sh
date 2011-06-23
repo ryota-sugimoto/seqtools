@@ -30,7 +30,7 @@ FILE1=$(basename "${1}")
 FILE2=$(basename "${2}")
 
 #path to the reference file
-REFERENCE=~/Library/hg19/hg19.fa
+REFERENCE=/usr/local/share/doc/hg19/hg19.fa
 test -e "${REFERENCE}" || { echo "${REFERENCE} not found."; exit 1; }
 
 #main processes
