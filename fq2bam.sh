@@ -19,7 +19,6 @@ checkcommand bwa
 checkcommand samtools
 checkcommand fastq_quality_trimmer
 checkcommand fastqUnpairedFilter.py
-checkcommand pileupFilter.awk
 
 #create output directory
 FILE1DIR="$(dirname "${1}")/"
