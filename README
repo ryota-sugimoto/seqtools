@@ -1,5 +1,5 @@
 script: pileupExonFilter.py
-usage: python pileupExonFilter.py bedfile in_pileup > out_pileup
+usage: pileupExonFilter.py bedfile in_pileup > out_pileup
 function: passes lines in in_pileup which position is inside exon ranges which is specified by bedfile.
 dependency: python RangeSet.py
 #
@@ -9,5 +9,6 @@ function: create range set. create normalized range list internally, and allows 
 dependency: python
 #
 script: fastqUnpairedFilter.py
-usage: remove Unpaired read from pair fastq sequence files.
+usage: fastqUnpairedFilter.py in_seq_1 in_seq_2 out_seq_1 out_seq_2
+function: remove Unpaired read from pair fastq sequence files.
 dependency: python
