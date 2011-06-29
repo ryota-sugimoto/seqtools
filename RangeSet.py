@@ -26,7 +26,15 @@ class RangeSet:
 		del self.normalizedlist[startIndex: endIndex]
 		for value in insortingValues:
 			bisect.insort(self.normalizedlist, value)
-
+	
+	def getWidth(self):
+		res = 0
+		count = 0
+		for l in self.normalizedlist[1::2]:
+			res += l - self.normalizedlist[count]
+			count += 2
+		return res
+	
 def removedContacts(list):
 	start = list[0]
 	end = list[1]
@@ -58,3 +66,4 @@ if __name__ == "__main__":
 				print value, "outsides rangeSet"
 		except ValueError:
 			pass
+		print "width: ", rangeSet.getWidth()

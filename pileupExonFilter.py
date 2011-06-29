@@ -2,6 +2,7 @@
 
 import re
 import sys
+import os.path
 import RangeSet
 
 def lineBeginWithChr(line):
@@ -54,14 +55,34 @@ def pileupExonFilter(pileupfileobj, exonRangeSet):
 		if positionInExon(chr, position, exonRangeSet):
 			sys.stdout.write(line)
 
+def writeExonWidth(bedFN, exonRangeSet):
+	dir = os.path.dirname(bedFN)
+	raw_bedFN = os.path.basename(bedFN)
+	if dir:
+		dir = dir + "/"
+	else:
+		dir = "./"
+	widthfile = open(dir + raw_bedFN + ".width", "w")
+	sum = 0
+	for chr in exonRangeSet.keys():
+		width = int(exonRangeSet[chr].getWidth())
+		sum += width
+		print >> widthfile, chr, "\t", width
+	print >> widthfile, "tortal", sum
+	widthfile.close()
+	
+def readBedfile(bedFN):
+	exonDict = createExonDictionary(open(bedFN, "r"))
+	exonRangeSet = createExonRangeSet(exonDict)
+	writeExonWidth(bedFN, exonRangeSet)
+	return exonRangeSet
+		
 if __name__ == "__main__":
-	import sys
 	usage = "Usage: pileupExonFilter.py bedfile in_pileup > out_pileup"
 	if len(sys.argv) != 3:
 		print usage
 		exit(1)
 	bedFN = sys.argv[1]
-	exonDict = createExonDictionary(open(bedFN,"r"))
-	exonRangeSet = createExonRangeSet(exonDict)
+	exonRangeSet = readBedfile(bedFN)
 	pileupFN = sys.argv[2]
 	pileupExonFilter(open(pileupFN,"r"),exonRangeSet)
