@@ -2,18 +2,19 @@
 USAGE="usage: fq2bam.sh in_seq_1 in_seq_2"
 if (( $# == 0 ))
 then
-    echo "${USAGE}"
+    echo "${USAGE}" >&2 
     exit 1
 fi
 
 #check input file existece
-test -e "${1}" || { echo "${1} not found."; exit 1; }
-test -e "${2}" || { echo "${2} not found."; exit 1; }
+test -e "${1}" || { echo "${1} not found." >&2; exit 1; }
+test -e "${2}" || { echo "${2} not found." >&2; exit 1; }
 
 #check required commands
 function checkcommand()
 {
-  which "${1}" > /dev/null 2>&1 || { echo "Command ${1} not found." ; exit 1; }
+    which "${1}" > /dev/null 2>&1 
+      || { echo "Command ${1} not found." >&2; exit 1; }
 }
 checkcommand bwa
 checkcommand samtools
@@ -30,7 +31,7 @@ FILE2=$(basename "${2}")
 
 #path to the reference file
 REFERENCE=/usr/local/share/doc/hg19/hg19.fa
-test -e "${REFERENCE}" || { echo "${REFERENCE} not found."; exit 1; }
+test -e "${REFERENCE}" || { echo "${REFERENCE} not found." >&2; exit 1; }
 
 #main processes
 fastq_quality_trimmer -t 20 -l 75 -i "${1}" -o "${OUT}${FILE1}.trimmed"

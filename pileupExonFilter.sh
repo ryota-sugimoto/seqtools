@@ -20,7 +20,7 @@ checkcommand pileupExonFilter.py
 
 #main process
 pileupExonFilter.py "${1}" "${2}" > "${3}" \
- || { echo "pileupExonFilter.py is failed" >&2; exit 1; }
+ || { echo "pileupExonFilter.py failed" >&2; exit 1; }
 
 #report
 for chr in `awk '{ print $1 }' < "${1}.width" | sort -n -t r -k 2 | uniq`
