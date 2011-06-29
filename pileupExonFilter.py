@@ -16,7 +16,7 @@ def createExonDictionary(fileobj):
 			splitedline = line.strip("\n").split("\t")
 			try:
 				chr = splitedline[0].strip()
-				exonbegin = int(splitedline[1])
+				exonbegin = int(splitedline[1]) + 1
 				exonend = int(splitedline[2]) + 1
 			except (IndexError, ValueError):
 				sys.stderr.write("ERROR: Unexpected format in bed.\n")
@@ -47,7 +47,7 @@ def pileupExonFilter(pileupfileobj, exonRangeSet):
 		splitedline = line.strip("\n").split("\t")
 		try:
 			chr = splitedline[0].strip()
-			position = int(splitedline[1]) - 1 #pileup2bed position
+			position = int(splitedline[1])
 		except (IndexError, ValueError):
 			sys.stderr.write("ERROR: Unexpected format in pileup.\n")
 			sys.stderr.write(line)
