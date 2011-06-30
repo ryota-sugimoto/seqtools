@@ -1,19 +1,23 @@
 script: pileupExonFilter.py
 usage: pileupExonFilter.py bedfile in_pileup > out_pileup
-function: passes lines in in_pileup which position is inside exon ranges which is specified by bedfile.
+function: Filtering lines in in_pileup which position is outside of exon ranges which is specified by bedfile.
 dependency: python RangeSet.py
+#
+script: pileupExonFilter.sh
+usage: pileupExonFilter.sh bedfile in_pileup out_pileup > report
+function: A Wrapper shellscript of pileupExonFilter.py which output matching ratio, and uses filtered pileup which is removed insertion or deletion base from specified pileup file.
 #
 script: RangeSet.py
 usage: class file
-function: create range set. create normalized range list internally, and allows to determine that requested position is insided or not as O(logn) speed.
+function: Defines RangeSet class. Create normalized range list internally, and allows to determine that requested position is insided or not as O(logn) speed.
 dependency: python
 #
 script: fastqUnpairedFilter.py
 usage: fastqUnpairedFilter.py in_seq_1 in_seq_2 out_seq_1 out_seq_2
-function: remove Unpaired read from pair fastq sequence files.
+function: Remove Unpaired read from pair fastq sequence files.
 dependency: python
 #
 script: fq2bam.sh
 usage: fq2bam.sh in_seq_1 in_seq_2 
-function: lazy script to create sai,bam,pileup from paired fastq sequence data.
+function: A lazy script to create sai,bam,pileup from paired fastq sequence data.
 dependency: python fastqUnpairedFilter.py bwa samtools fastx_toolkit
