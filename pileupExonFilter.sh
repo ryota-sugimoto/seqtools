@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 USAGE="Usage: pileupExonFilter.sh bedfile in_pileup out_pileup > report"
-if (( $# == 0 ))
+if [ $# == 0 ]
 then
     echo "${USAGE}" >&2
     exit 1
@@ -18,8 +18,17 @@ function checkcommand()
 }
 checkcommand pileupExonFilter.py
 
+#
 #main process
-pileupExonFilter.py "${1}" "${2}" > "${3}" \
+#
+#remove insertion or deletion
+PILEUPDIR=$(dirname "${2}")
+PILEUPFN=$(basename "${2}")
+NOINSPILEUP="${PILEUPDIR}/noInsDel.${PILEUPFN}"
+awk '$3 != "*"{ print }' "${2}" > "${NOINSPILEUP}"
+
+#exon filtering
+pileupExonFilter.py "${1}" "${NOINSPILEUP}" > "${3}" \
  || { echo "pileupExonFilter.py failed" >&2; exit 1; }
 
 #report
