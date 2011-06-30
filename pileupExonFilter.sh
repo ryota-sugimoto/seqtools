@@ -32,6 +32,7 @@ pileupExonFilter.py "${1}" "${NOINSPILEUP}" > "${3}" \
  || { echo "pileupExonFilter.py failed" >&2; exit 1; }
 
 #report
+printf "%25s%15s%15s%15s\n" chr bed_width pileup_width ratio
 for chr in `awk '{ print $1 }' < "${1}.width" | sort -n -t r -k 2 | uniq`
 do
     BEDWIDTH=$(grep "${chr}[[:space:]]" "${1}.width" | awk '{print $2}')

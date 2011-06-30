@@ -72,7 +72,9 @@ def writeExonWidth(bedFN, exonRangeSet):
 	widthfile.close()
 	
 def readBedfile(bedFN):
-	exonDict = createExonDictionary(open(bedFN, "r"))
+	bedfileobj = open(bedFN, "r")
+	exonDict = createExonDictionary(bedfileobj)
+	bedfileobj.close()
 	exonRangeSet = createExonRangeSet(exonDict)
 	writeExonWidth(bedFN, exonRangeSet)
 	return exonRangeSet
@@ -85,4 +87,6 @@ if __name__ == "__main__":
 	bedFN = sys.argv[1]
 	exonRangeSet = readBedfile(bedFN)
 	pileupFN = sys.argv[2]
-	pileupExonFilter(open(pileupFN,"r"),exonRangeSet)
+	pileupfileobj = open(pileupFN,"r")
+	pileupExonFilter(pileupfileobj, exonRangeSet)
+	pileupfileobj.close()
