@@ -6,6 +6,7 @@ dependency: python RangeSet.py
 script: pileupExonFilter.sh
 usage: pileupExonFilter.sh bedfile in_pileup out_pileup > report
 function: A Wrapper shellscript of pileupExonFilter.py which output matching ratio, and uses filtered pileup which is removed insertion or deletion base from specified pileup file.
+dependency: pileupExonFilter.py
 #
 script: RangeSet.py
 usage: class file
