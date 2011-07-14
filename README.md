@@ -8,8 +8,8 @@ Remove bases which position is locating outiside of exon ranges.
 Exon ranges are specified by bedfile.
 
 ###Dependency
+
 python RangeSet.py
------
 ##pileupExonFilter.sh
 
 ###Usage
@@ -20,7 +20,7 @@ A Wrapper shellscript of pileupExonFilter.py.
 
 ###Dependency
 pileupExonFilter.py
------
+
 ##RangeSet.py
 
 ###Usage
@@ -32,7 +32,7 @@ Create normalized range list internally.
 
 ###Dependency
 python
------
+
 ##fastqUnpairedFilter.py
 
 ###Usage
@@ -43,7 +43,7 @@ Remove Unpaired read from pair fastq sequence files.
 
 ###Dependency
 python
------
+
 ##fq2bam.sh
 
 ###Usage
