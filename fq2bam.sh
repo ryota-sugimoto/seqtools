@@ -3,14 +3,17 @@ USAGE="Usage: fq2bam.sh [options] in_seq_1 in_seq_2"
 
 #perse options
 OPTERR=0
-while getopts 'o:pr:t:l:' OPTION
+while getopts 'c:o:pqur:t:l:' OPTION
 do
     case $OPTION in
     o) OUT="${OPTARG%/}/" ;;
     r) REFERENCE=$OPTARG ;;
     p) CREATEPILEUP=1 ;;
+    q) DO_QUALITYTRIMM=1 ;;
+    u) DO_UNPAIRRFILTER=1 ;;
     t) tOPT=$OPTARG ;;
     l) lOPT=$OPTARG ;;
+    c) BWATHREAD=$OPTARG ;; 
     ?) { echo $USAGE >&2 ; exit 1; };;
     esac
 done
@@ -48,21 +51,28 @@ test -e "${REFERENCE}" \
 #main processes
 [ $tOPT ] || tOPT=20
 [ $lOPT ] || lOPT=75
-fastq_quality_trimmer -t $tOPT -l $lOPT -i "${1}" -o "${OUT}${FILE1}.trimmed"
-fastq_quality_trimmer -t $tOPT -l $lOPT -i "${2}" -o "${OUT}${FILE2}.trimmed"
+if [ $DO_QUALITYTRIMM ]
+then
+  fastq_quality_trimmer -t $tOPT -l $lOPT -i "${1}" -o "${OUT}${FILE1}.trimmed"
+  fastq_quality_trimmer -t $tOPT -l $lOPT -i "${2}" -o "${OUT}${FILE2}.trimmed"
+fi
 
-fastqUnpairedFilter.py "${OUT}${FILE1}.trimmed" \
+if [ $DO_UNPAIRFILTER ]
+then
+  fastqUnpairedFilter.py "${OUT}${FILE1}.trimmed" \
                                   "${OUT}${FILE2}.trimmed" \
                                   "${OUT}${FILE1}.trimmed.filtered" \
                                   "${OUT}${FILE2}.trimmed.filtered"
+fi
 
-bwa aln -t 4 "${REFERENCE}" \
-             "${OUT}${FILE1}.trimmed.filtered" \
-           > "${OUT}${FILE1}.sai"
+[ $BWATHREAD ] || BWATHREAD=4
+bwa aln -t $BWATHREAD "${REFERENCE}" \
+                      "${OUT}${FILE1}.trimmed.filtered" \
+                    > "${OUT}${FILE1}.sai"
 
-bwa aln -t 4 "${REFERENCE}" \
-             "${OUT}${FILE2}.trimmed.filtered" \
-           > "${OUT}${FILE2}.sai"
+bwa aln -t $BWATHREAD "${REFERENCE}" \
+                      "${OUT}${FILE2}.trimmed.filtered" \
+                    > "${OUT}${FILE2}.sai"
 
 SAMFN="${FILE1/_?_sequence/_sequence}.sam"
 bwa sampe "${REFERENCE}" \

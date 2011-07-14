@@ -17,8 +17,30 @@ script: fastqUnpairedFilter.py
 usage: fastqUnpairedFilter.py in_seq_1 in_seq_2 out_seq_1 out_seq_2
 function: Remove Unpaired read from pair fastq sequence files.
 dependency: python
-#
-script: fq2bam.sh
-usage: fq2bam.sh in_seq_1 in_seq_2 
-function: A lazy script to create sai,bam,pileup from paired fastq sequence data.
-dependency: python fastqUnpairedFilter.py bwa samtools fastx_toolkit
+
+##script:
+  fq2bam.sh
+
+###usage:
+  fq2bam.sh [options] in_seq_1 in_seq_2 
+
+###function: 
+  A lazy script to create sai,bam,pileup from paired fastq sequence data.
+
+###options:
+ -o PATH 
+      Specify output directory.　
+      If not specified then create out/ directory at where contains in_seq_1.
+
+ -r PATH 
+      Specify the directory which contais reference files. If not specified,
+      uses /usr/local/share/doc/hg19.
+
+ -p     
+      Create pileup file additionaly.
+
+ -q     
+
+
+###dependency:
+  python fastqUnpairedFilter.py bwa samtools fastx_toolkit
