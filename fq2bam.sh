@@ -58,12 +58,12 @@ INIT_FILE2=${2}
 if [ ! $DO_NOT_QUALITYTRIM ]
 then
   [ $tOPT ] || tOPT=20 #default -t value
-  [ $lOPT ] || lOPT=75 #default -l value
+  [ $lOPT ] || lOPT=70 #default -l value
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).trimmed"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).trimmed"
-  fastq_quality_trimmer -t $tOPT -l $lOPT -i "$INIT_FILE1" \
+  fastq_quality_trimmer -t $tOPT -v -l $lOPT -i "$INIT_FILE1" \
                                           -o "$NEW_FILE1"
-  fastq_quality_trimmer -t $tOPT -l $lOPT -i "$INIT_FILE2" \
+  fastq_quality_trimmer -t $tOPT -v -l $lOPT -i "$INIT_FILE2" \
                                           -o "$NEW_FILE2"
   INIT_FILE1="$NEW_FILE1"
   INIT_FILE2="$NEW_FILE2"
@@ -75,9 +75,9 @@ then
   ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).clipped"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).clipped"
-  fastx_clipper -a $ADAPTERSEQ -n -v -l 75 -i "$INIT_FILE1" \
+  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE1" \
                                            -o "$NEW_FILE1"
-  fastx_clipper -a $ADAPTERSEQ -n -v -l 75 -i "$INIT_FILE2" \
+  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE2" \
                                            -o "$NEW_FILE2"
   INIT_FILE1="$NEW_FILE1"
   INIT_FILE2="$NEW_FILE2"
