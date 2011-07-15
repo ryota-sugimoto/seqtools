@@ -64,11 +64,11 @@ If not specified, uses /usr/local/share/doc/hg19/ as default.
 ####-p
 Create pileup file additionaly.
 
-####-a [ATGC][ATGC]*
-Operate adaptor clipping with specified sequences.
+####-a
+Do NOT operate adapter clipping for the raw sequence data.
 
 ####-q
-Do NOT operate qualitry trimming to the raw sequence data.
+Do NOT operate qualitry trimming for the raw sequence data.
 
 ####-t INT
 Chain for fastq_quality_trimmer -t option.
@@ -77,7 +77,7 @@ Chain for fastq_quality_trimmer -t option.
 Chain for fastq_quality_trimmer -l option.
 
 ####-u
-Do NOT remove unpaired read from the raw sequence data.
+Do NOT remove unpaired reads for the raw sequence data.
 
 ####-c INT
 Chain for bwa aln -t option.

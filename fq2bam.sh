@@ -3,15 +3,15 @@ USAGE="Usage: fq2bam.sh [options] in_seq_1 in_seq_2"
 
 #perse options
 OPTERR=0
-while getopts 'a:c:o:pqur:t:l:' OPTION
+while getopts 'ac:o:pqur:t:l:' OPTION
 do
     case $OPTION in
     o) OUT="${OPTARG%/}/" ;;
     r) REFERENCE=$OPTARG ;;
     p) CREATEPILEUP=1 ;;
-    q) DO_NOT_QUALITYTRIMM=1 ;;
+    q) DO_NOT_QUALITYTRIM=1 ;;
     u) DO_NOT_UNPAIREDFILTER=1 ;;
-    a) CLIPPING_ADAPTER=$OPTARG ;;
+    a) DO_NOT_ADAPTERCLIP=1 ;;
     t) tOPT=$OPTARG ;;
     l) lOPT=$OPTARG ;;
     c) BWATHREAD=$OPTARG ;; 
@@ -55,7 +55,7 @@ INIT_FILE1=${1}
 INIT_FILE2=${2}
 
 #quality trimming
-if [ ! $DO_NOT_QUALITYTRIMM ]
+if [ ! $DO_NOT_QUALITYTRIM ]
 then
   [ $tOPT ] || tOPT=20 #default -t value
   [ $lOPT ] || lOPT=75 #default -l value
@@ -70,16 +70,15 @@ then
 fi
 
 #clipping adapter
-if [ $CLIPPING_ADAPTER ]
+if [ ! $DO_NOT_ADAPTERCLIP ]
 then
+  ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).clipped"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).clipped"
-  fastx_clipper -a $CLIPPING_ADAPTGER -n -v -l 75 -i "$INIT_FILE1" \
-                                                  -o "$NEW_FILE1"
-  fastx_clipper -a $CLIPPING_ADAPTGER -n -v -l 75 -i "$INIT_FILE2" \
-                                                  -o "$NEW_FILE2"
-  [[ $INIT_FILE1 != $ORIGIN1 ]] && rm $INIT_FILE1
-  [[ $INIT_FILE2 != $ORIGIN2 ]] && rm $INIT_FILE2
+  fastx_clipper -a $ADAPTERSEQ -n -v -l 75 -i "$INIT_FILE1" \
+                                           -o "$NEW_FILE1"
+  fastx_clipper -a $ADAPTERSEQ -n -v -l 75 -i "$INIT_FILE2" \
+                                           -o "$NEW_FILE2"
   INIT_FILE1="$NEW_FILE1"
   INIT_FILE2="$NEW_FILE2"
 fi
@@ -93,8 +92,6 @@ then
                          "$INIT_FILE2" \
                          "$NEW_FILE1" \
                          "$NEW_FILE2"
-  [[ $INIT_FILE1 != $ORIGIN1 ]] && rm $INIT_FILE1
-  [[ $INIT_FILE2 != $ORIGIN2 ]] && rm $INIT_FILE2
   INIT_FILE1=$NEW_FILE1
   INIT_FILE2=$NEW_FILE2
 fi
@@ -141,4 +138,4 @@ then
   awk '( $6 >= 20 ) && ( $8 >= 20 ){ print }' "${OUT}${PILEUPFN}" \
                            > "${OUT}${PILEUPFN%.pileup}.filtered.pileup"
 fi
-echo "fq2bam.sh: complete"
+echo "Done."
