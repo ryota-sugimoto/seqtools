@@ -54,6 +54,20 @@ ORIGIN2=${2}
 INIT_FILE1=${1}
 INIT_FILE2=${2}
 
+#clipping adapter
+if [ ! $DO_NOT_ADAPTERCLIP ]
+then
+  ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
+  NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).clipped"
+  NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).clipped"
+  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE1" \
+                                           -o "$NEW_FILE1"
+  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE2" \
+                                           -o "$NEW_FILE2"
+  INIT_FILE1="$NEW_FILE1"
+  INIT_FILE2="$NEW_FILE2"
+fi
+
 #quality trimming
 if [ ! $DO_NOT_QUALITYTRIM ]
 then
@@ -69,19 +83,6 @@ then
   INIT_FILE2="$NEW_FILE2"
 fi
 
-#clipping adapter
-if [ ! $DO_NOT_ADAPTERCLIP ]
-then
-  ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
-  NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).clipped"
-  NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).clipped"
-  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE1" \
-                                           -o "$NEW_FILE1"
-  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE2" \
-                                           -o "$NEW_FILE2"
-  INIT_FILE1="$NEW_FILE1"
-  INIT_FILE2="$NEW_FILE2"
-fi
 
 #filtering unpaired reads
 if [ ! $DO_NOT_UNPAIREDFILTER ]
