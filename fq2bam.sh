@@ -118,6 +118,10 @@ bwa sampe "${REFERENCE}" \
           "$INIT_FILE2" \
         > "${OUT}${SAMFN}"
 
+#create fai
+test -e "${REFERENCE}.fai" \
+  || bwa index ${REFERENCE}
+
 #create bam
 BAMFN="${SAMFN%.sam}.bam"
 samtools import "${REFERENCE}.fai" \
