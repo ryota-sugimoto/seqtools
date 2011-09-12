@@ -82,5 +82,8 @@ Do NOT remove unpaired reads for the raw sequence data.
 ####-c INT
 Chain for bwa aln -t option.
 
+####-i
+Do ill2sanger convert.
+
 ###dependency
 python fastqUnpairedFilter.py bwa samtools fastx_toolkit
