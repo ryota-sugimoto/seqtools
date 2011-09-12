@@ -3,7 +3,7 @@ USAGE="Usage: fq2bam.sh [options] in_seq_1 in_seq_2"
 
 #perse options
 OPTERR=0
-while getopts 'ac:o:pqur:t:l:' OPTION
+while getopts 'ac:o:pqur:t:l:i' OPTION
 do
     case $OPTION in
     o) OUT="${OPTARG%/}/" ;;
@@ -14,7 +14,8 @@ do
     a) DO_NOT_ADAPTERCLIP=1 ;;
     t) tOPT=$OPTARG ;;
     l) lOPT=$OPTARG ;;
-    c) BWATHREAD=$OPTARG ;; 
+    c) BWATHREAD=$OPTARG ;;
+    i) DO_ILL2SANGER=1 ;;
     ?) { echo $USAGE >&2 ; exit 1; };;
     esac
 done
@@ -97,6 +98,20 @@ then
   INIT_FILE2=$NEW_FILE2
 fi
 
+#convert illumina to sanger format
+if [ $DO_ILL2SANGER ]
+then
+  NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).sanger"
+  NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).sanger"
+  maq ill2sanger "$INIT_FILE1" \
+                 "$NEW_FILE1"
+  maq ill2sanger "$INIT_FILE2" \
+                 "$NEW_FILE2"
+  INIT_FILE1=$NEW_FILE1
+  INIT_FILE2=$NEW_FILE2
+fi
+
+
 #create sai
 SAIFN1="${OUT}$(basename ${INIT_FILE1}).sai"
 SAIFN2="${OUT}$(basename ${INIT_FILE2}).sai" 
@@ -110,7 +125,8 @@ bwa aln -t $BWATHREAD "${REFERENCE}" \
                     > "$SAIFN2"
 
 #create sam
-SAMFN=$(echo $(basename $INIT_FILE1) | sed 's/[12]\([^0-9][^0-9]*\)$/\1/').sam
+SAMFN=$(echo $(basename $INIT_FILE1) \
+  | sed 's/\(^s_[1-9][0-9]*_\)[12]_/\1/').sam
 bwa sampe "${REFERENCE}" \
           "$SAIFN1" \
           "$SAIFN2" \
