@@ -30,6 +30,8 @@ class gvfAttributes:
 	def __repr__(self):
 		return ";".join([ "=".join(pair) for pair in zip(self.data.keys(),self.data.values())])
 
+import time
+	
 class gvfDataUnit:
 	def __init__(self, in_str):
 		self.tags = ("chr", "source", "type", "start", "end",
@@ -44,11 +46,11 @@ class gvfDataUnit:
 			availableStrand = set(["+","-",".","?"])
 			if self.data["strand"] not in availableStrand:
 				raise ValueError
-		
 		try:
 			splited_line = in_str.strip("\n").split("\t")
 			for (tag,value) in zip(self.tags,splited_line):
 				if tag == "attributes":
+					mytimer = time.time()
 					self.data[tag] = gvfAttributes(value)
 				else:
 					self.data[tag] = value
@@ -79,12 +81,33 @@ class gvfDataUnit:
 		except KeyError:
 			sys.stderr.write("##WARN There is no Variant_effect\n")
 			sys.stderr.write("##WARN " + str(self) + "\n")
-			return
+			return "other"
 		for kind in kinds:
-			if re.search(kind, ve):
+			if re.search(",{0,1}"+kind, ve):
 				return kind
-			else:
-				return "other"
+		return "other"
+	
+	def baseVariant(self):
+		try:
+			var = self["attributes"]["Variant_seq"].split(",")
+			ref = self["attributes"]["Reference_seq"]
+		except KeyError:
+			sys.stderr.write("##WARN There is no Variant_seq\n")
+			sys.stderr.write("##WARN " + str(self) + "\n")
+			return None
+		for seq in var:
+			if ref != seq:
+				return ref + seq
+
+def transKind(trans):
+	transitions = set(["AG","GA","CT","TC"])
+	transversions = set(["AC","CA","GT","TG","AT","TA","GC","CG"])
+	if trans.upper() in transitions:
+		return "transition"
+	elif trans.upper() in transversions:
+		return "transversion"
+	else:
+		return "unknown"
 				
 if __name__ == "__main__":
 	file = open(sys.argv[1])
