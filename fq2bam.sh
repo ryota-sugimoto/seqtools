@@ -6,7 +6,7 @@ Usage: fq2bam.sh [options] in_seq_1 in_seq_2
  
         -r file   Specify Reference fasta.
 
-        -p        create pileup file additionaly.
+        -p        create pileup file additionally.
 
         -q        Do not quality trimming.
 
@@ -29,7 +29,11 @@ EOF
 #default values
 QUALITY_TRIM_T=20 
 QUALITY_TRIM_L=70
- 
+ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
+BWATHREAD=4 
+OUT="$(pwd)"
+REFERENCE="/usr/local/share/doc/hg19/hg19.fa"
+
 #perse options
 while getopts 'ac:o:pqur:t:l:id' OPTION
 do
@@ -45,12 +49,13 @@ do
     c) BWATHREAD=$OPTARG ;;
     i) DO_ILL2SANGER="-I" ;;
     d) RM_INTERNAL_FILES=1 ;;
-    ?) { echo -e $USAGE >&2 ; exit 1; };;
+    ?) { echo -e "$USAGE" >&2 ; exit 1; };;
     esac
 done
 shift $(($OPTIND - 1))
 
 #check input file existece
+[ $# != 2 ] && { echo -e "$USAGE"; exit 1; }
 test -e "${1}" || { echo "File ${1} not found." >&2; exit 1; }
 test -e "${2}" || { echo "File ${2} not found." >&2; exit 1; }
 
@@ -67,14 +72,9 @@ checkcommand fastqUnpairedFilter.py
 checkcommand fastx_clipper
 
 #create output directory
-FILE1DIR="$(dirname "${1}")"
-[ $OUT ] \
-  && mkdir -p "${OUT}" \
-  || { OUT="${FILE1DIR}/fq2bam_out/"; mkdir "${OUT}"; }
+ mkdir -p "${OUT}" || exit 1
 
-#path to the reference file
-[ $REFERENCE ] \
-  || REFERENCE="/usr/local/share/doc/hg19/hg19.fa" #default reference path
+#check reference file
 test -e "${REFERENCE}" \
   || { echo "Reference file ${REFERENCE} not found." >&2; exit 1; }
 
@@ -87,7 +87,6 @@ INIT_FILE2=${2}
 #clipping adapter
 if [ ! $DO_NOT_ADAPTERCLIP ]
 then
-  ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).clipped"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).clipped"
   fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE1" -o "$NEW_FILE1" \
@@ -146,7 +145,6 @@ fi
 #create sai
 SAIFN1="${OUT}$(basename ${INIT_FILE1}).sai"
 SAIFN2="${OUT}$(basename ${INIT_FILE2}).sai" 
-[ $BWATHREAD ] || BWATHREAD=4 #default threads
 bwa aln ${DO_ILL2SANGER} -t $BWATHREAD "${REFERENCE}" \
                       "$INIT_FILE1" \
                     > "$SAIFN1" || exit 1
