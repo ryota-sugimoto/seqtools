@@ -176,10 +176,13 @@ BAMFN="${SAMFN%.sam}.bam"
 samtools import "${REFERENCE}.fai" \
                 "${OUT}${SAMFN}" \
                 "${OUT}${BAMFN}" || exit 1
+[ ${RM_INTERNAL_FILES} ] && rm ${OUT}${SAMFN}
+
 
 #create sorted.bam
 SORTEDBAMFN="${BAMFN%.bam}.sorted"
 samtools sort "${OUT}${BAMFN}" "${OUT}${SORTEDBAMFN}" || exit 1
+[ ${RM_INTERNAL_FILES} ] && rm ${OUT}${BAMFN}
 
 samtools index "${OUT}${SORTEDBAMFN}.bam" || exit 1
 
