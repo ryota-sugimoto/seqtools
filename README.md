@@ -55,11 +55,9 @@ A lazy script to create sai,bam,pileup from paired fastq sequence data.
 ###Options
 ####-o PATH
 Specify output directory.
-If not specified, create out/ directory at where the location of in_seq_1.
 
 ####-r PATH
-Specify the directory which contais reference files.
-If not specified, uses /usr/local/share/doc/hg19/ as default.
+Specify reference fasta.
 
 ####-p
 Create pileup file additionaly.
