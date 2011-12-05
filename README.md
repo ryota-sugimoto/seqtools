@@ -65,25 +65,28 @@ If not specified, uses /usr/local/share/doc/hg19/ as default.
 Create pileup file additionaly.
 
 ####-a
-Do NOT operate adapter clipping for the raw sequence data.
+Do not operate adapter clipping for the raw sequence data.
 
 ####-q
-Do NOT operate qualitry trimming for the raw sequence data.
+Do not operate qualitry trimming for the raw sequence data.
 
 ####-t INT
-Chain for fastq_quality_trimmer -t option.
+fastq_quality_trimmer -t option.
 
 ####-l INT
-Chain for fastq_quality_trimmer -l option.
+fastq_quality_trimmer -l option.
 
 ####-u
-Do NOT remove unpaired reads for the raw sequence data.
+Do not remove unpaired reads for the raw sequence data.
 
 ####-c INT
 Chain for bwa aln -t option.
 
 ####-i
 Do ill2sanger convert.
+
+####-d
+Delete internal files.
 
 ###dependency
 python fastqUnpairedFilter.py bwa samtools fastx_toolkit
