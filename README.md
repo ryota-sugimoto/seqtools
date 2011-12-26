@@ -65,6 +65,12 @@ Create pileup file additionaly.
 ####-a
 Do not operate adapter clipping for the raw sequence data.
 
+####-A [ATGC][ATGC]*
+Specify apaptor sequence
+
+####-M
+Required minimum adaptor length of clipping.
+
 ####-q
 Do not operate qualitry trimming for the raw sequence data.
 

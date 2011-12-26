@@ -14,6 +14,10 @@ Usage: fq2bam.sh [options] in_seq_1 in_seq_2
 
         -a        Do not adapter clipping.
 
+        -A [ATGC][ATGC]* 
+                  Spceify clipping adapter sequence.
+        -M int
+                  Required minimum adaptor length.
         -t int    t value of quality trimming.
 
         -l int    l value of quality trimming.
@@ -29,13 +33,13 @@ EOF
 #default values
 QUALITY_TRIM_T=20 
 QUALITY_TRIM_L=70
-ADAPTERSEQ="AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAGACCGATCTCGTATGCCGTCTTCTGCTTG"
+ADAPTERSEQ="AGATCGG"
 BWATHREAD=4 
 OUT="$(pwd)/"
 REFERENCE="/usr/local/share/doc/hg19/hg19.fa"
 
 #perse options
-while getopts 'ac:o:pqur:t:l:id' OPTION
+while getopts 'ac:o:pqur:t:l:idA:M:' OPTION
 do
     case $OPTION in
     o) OUT="${OPTARG%/}/" ;;
@@ -49,6 +53,10 @@ do
     c) BWATHREAD=$OPTARG ;;
     i) DO_ILL2SANGER="-I" ;;
     d) RM_INTERNAL_FILES=1 ;;
+    A) [ $(echo ${OPTARG} | tr -d "ATGC") ] \
+         && { echo "illegal adapter sequence ${OPTARG}";  exit 1;} \
+         || ADAPTERSEQ=${OPTARG} ;;
+    M) MIN_ADAPTOR="-M ${OPTARG}" ;;
     ?) { echo -e "$USAGE" >&2 ; exit 1; };;
     esac
 done
@@ -89,12 +97,37 @@ if [ ! $DO_NOT_ADAPTERCLIP ]
 then
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).clipped"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).clipped"
-  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE1" -o "$NEW_FILE1" \
-    || exit 1
-  fastx_clipper -a $ADAPTERSEQ -n -v -l 70 -i "$INIT_FILE2" -o "$NEW_FILE2" \
-    || exit 1
+  COMMAND1=$(cat << EOF
+fastx_clipper 
+    -a $ADAPTERSEQ
+    ${MIN_ADAPTOR}
+    -Q 33 
+    -n -v 
+    -l 70 
+    -i ${INIT_FILE1}
+    -o ${NEW_FILE1}
+EOF
+)
+  COMMAND2=$(cat << EOF
+fastx_clipper 
+    -a $ADAPTERSEQ 
+    ${MIN_ADAPTOR}
+    -Q 33 
+    -n -v 
+    -l 70 
+    -i ${INIT_FILE2}
+    -o ${NEW_FILE2}
+EOF
+)
+  echo "${COMMAND1}"
+  ${COMMAND1} || exit 1
+  echo
+  echo "${COMMAND2}"
+  ${COMMAND2} || exit 2
   INIT_FILE1="$NEW_FILE1"
   INIT_FILE2="$NEW_FILE2"
+  echo
+  echo
 fi
 
 #quality trimming
@@ -102,14 +135,39 @@ if [ ! $DO_NOT_QUALITYTRIM ]
 then
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).trimmed"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).trimmed"
-  fastq_quality_trimmer -t $QUALITY_TRIM_T -v -l $QUALITY_TRIM_L -i "$INIT_FILE1" -o "$NEW_FILE1" \
-    || exit 1
-  fastq_quality_trimmer -t $QUALITY_TRIM_T -v -l $QUALITY_TRIM_L -i "$INIT_FILE2" -o "$NEW_FILE2" \
-    || exit 1
-  [ ${RM_INTERNAL_FILES} -a ${INIT_FILE1} != ${ORIGIN1} ] && rm ${INIT_FILE1}
-  [ ${RM_INTERNAL_FILES} -a ${INIT_FILE2} != ${ORIGIN2} ] && rm ${INIT_FILE2}
+  COMMAND1=$(cat << EOF
+fastq_quality_trimmer 
+    -t ${QUALITY_TRIM_T}
+    -v 
+    -Q 33 
+    -l ${QUALITY_TRIM_L}
+    -i ${INIT_FILE1}
+    -o ${NEW_FILE1}
+EOF
+)
+  COMMAND2=$(cat << EOF
+fastq_quality_trimmer 
+    -t ${QUALITY_TRIM_T}
+    -v 
+    -Q 33 
+    -l ${QUALITY_TRIM_L}
+    -i ${INIT_FILE2}
+    -o ${NEW_FILE2}
+EOF
+)
+  echo "${COMMAND1}"
+  ${COMMAND1} || exit 1
+  echo
+  echo "${COMMAND2}"
+  ${COMMAND2} || exit 1
+  [ ${RM_INTERNAL_FILES} ] && [ ${INIT_FILE1} != ${ORIGIN1} ] \
+    && rm ${INIT_FILE1}
+  [ ${RM_INTERNAL_FILES} ] && [ ${INIT_FILE2} != ${ORIGIN2} ] \
+    && rm ${INIT_FILE2}
   INIT_FILE1="$NEW_FILE1"
   INIT_FILE2="$NEW_FILE2"
+  echo
+  echo
 fi
 
 
@@ -118,14 +176,23 @@ if [ ! $DO_NOT_UNPAIREDFILTER ]
 then
   NEW_FILE1="${OUT}$(basename ${INIT_FILE1}).filtered"
   NEW_FILE2="${OUT}$(basename ${INIT_FILE2}).filtered"
-  fastqUnpairedFilter.py "$INIT_FILE1" \
-                         "$INIT_FILE2" \
-                         "$NEW_FILE1" \
-                         "$NEW_FILE2" || exit 1
-  [ ${RM_INTERNAL_FILES} -a ${INIT_FILE1} != ${ORIGIN1} ] && rm ${INIT_FILE1}
-  [ ${RM_INTERNAL_FILES} -a ${INIT_FILE2} != ${ORIGIN2} ] && rm ${INIT_FILE2}
+  COMMAND=$(cat << EOF
+fastqUnpairedFilter.py ${INIT_FILE1}
+                         ${INIT_FILE2}
+                         ${NEW_FILE1}
+                         ${NEW_FILE2}
+EOF
+)
+  echo "${COMMAND}"
+  ${COMMAND}
+  [ ${RM_INTERNAL_FILES} ] && [ ${INIT_FILE1} != ${ORIGIN1} ] \
+    && rm ${INIT_FILE1}
+  [ ${RM_INTERNAL_FILES} ] && [ ${INIT_FILE2} != ${ORIGIN2} ] \
+    && rm ${INIT_FILE2}
   INIT_FILE1=$NEW_FILE1
   INIT_FILE2=$NEW_FILE2
+  echo
+  echo
 fi
 
 #convert illumina to sanger format
@@ -145,25 +212,45 @@ fi
 #create sai
 SAIFN1="${OUT}$(basename ${INIT_FILE1}).sai"
 SAIFN2="${OUT}$(basename ${INIT_FILE2}).sai" 
-bwa aln ${DO_ILL2SANGER} -t $BWATHREAD "${REFERENCE}" \
-                      "$INIT_FILE1" \
-                    > "$SAIFN1" || exit 1
-
-bwa aln ${DO_ILL2SANGER} -t $BWATHREAD "${REFERENCE}" \
-                      "$INIT_FILE2" \
-                    > "$SAIFN2" || exit 1
+COMMAND1=$(cat << EOF
+bwa aln ${DO_ILL2SANGER} 
+  -t ${BWATHREAD}
+  ${REFERENCE}
+  ${INIT_FILE1}
+EOF
+)
+COMMAND2=$(cat << EOF
+bwa aln ${DO_ILL2SANGER} 
+  -t ${BWATHREAD} 
+  ${REFERENCE}
+  ${INIT_FILE2}
+EOF
+)
+echo "${COMMAND1}"
+${COMMAND1} > "${SAIFN1}" || exit 1
+echo
+echo "${COMMAND2}"
+${COMMAND2} > "${SAIFN2}" || exit 1
+echo
+echo
 
 #create sam
 SAMFN=$(echo $(basename $INIT_FILE1) \
   | sed 's/\(^s_[1-9][0-9]*_\)[12]_/\1/').sam
-bwa sampe "${REFERENCE}" \
-          "$SAIFN1" \
-          "$SAIFN2" \
-          "$INIT_FILE1" \
-          "$INIT_FILE2" \
-        > "${OUT}${SAMFN}" || exit 1
-[ ${RM_INTERNAL_FILES} -a ${INIT_FILE1} != ${ORIGIN1} ] && rm ${INIT_FILE1}
-[ ${RM_INTERNAL_FILES} -a ${INIT_FILE2} != ${ORIGIN2} ] && rm ${INIT_FILE2}
+COMMAND=$(cat << EOF
+bwa sampe ${REFERENCE}
+          ${SAIFN1}
+          ${SAIFN2}
+          ${INIT_FILE1}
+          ${INIT_FILE2}
+EOF
+)
+echo "${COMMAND}"
+${COMMAND} > "${OUT}${SAMFN}" || exit 1
+echo
+echo
+[ ${RM_INTERNAL_FILES} ] && [ ${INIT_FILE1} != ${ORIGIN1} ] && rm ${INIT_FILE1}
+[ ${RM_INTERNAL_FILES} ] && [ ${INIT_FILE2} != ${ORIGIN2} ] && rm ${INIT_FILE2}
 [ ${RM_INTERNAL_FILES} ] && rm ${SAIFN1}
 [ ${RM_INTERNAL_FILES} ] && rm ${SAIFN2}
 
@@ -173,15 +260,31 @@ test -e "${REFERENCE}.fai" \
 
 #create bam
 BAMFN="${SAMFN%.sam}.bam"
-samtools import "${REFERENCE}.fai" \
-                "${OUT}${SAMFN}" \
-                "${OUT}${BAMFN}" || exit 1
+COMMAND=$(cat << EOF
+samtools import ${REFERENCE}.fai
+                ${OUT}${SAMFN}
+                ${OUT}${BAMFN}
+EOF
+)
+echo "${COMMAND}"
+${COMMAND} || exit 1
+echo
+echo
 [ ${RM_INTERNAL_FILES} ] && rm ${OUT}${SAMFN}
 
 
 #create sorted.bam
 SORTEDBAMFN="${BAMFN%.bam}.sorted"
-samtools sort "${OUT}${BAMFN}" "${OUT}${SORTEDBAMFN}" || exit 1
+COMMAND=$(cat << EOF
+samtools sort 
+  ${OUT}${BAMFN}
+  ${OUT}${SORTEDBAMFN}
+EOF
+)
+echo "${COMMAND}"
+${COMMAND} || exit 1
+echo
+echo
 [ ${RM_INTERNAL_FILES} ] && rm ${OUT}${BAMFN}
 
 samtools index "${OUT}${SORTEDBAMFN}.bam" || exit 1
