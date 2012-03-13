@@ -24,6 +24,8 @@ Usage: fq2bam.sh [options] in_seq_1 in_seq_2
 
         -c int    Number of threads of bwa align program.
 
+	-Q int    -Q parameter for clipper and trimmer
+
         -i        Illumina 1.3+ read format.
 
         -d        Remove internal files.
@@ -39,7 +41,7 @@ OUT="$(pwd)/"
 REFERENCE="/usr/local/share/doc/hg19/hg19.fa"
 
 #perse options
-while getopts 'ac:o:pqur:t:l:idA:M:' OPTION
+while getopts 'ac:o:pqur:t:l:idA:M:Q:' OPTION
 do
     case $OPTION in
     o) OUT="${OPTARG%/}/" ;;
@@ -57,6 +59,7 @@ do
          && { echo "illegal adapter sequence ${OPTARG}";  exit 1;} \
          || ADAPTERSEQ=${OPTARG} ;;
     M) MIN_ADAPTOR="-M ${OPTARG}" ;;
+    Q) Q_PARAMETER="-Q ${OPTARG}" ;;
     ?) { echo -e "$USAGE" >&2 ; exit 1; };;
     esac
 done
@@ -101,7 +104,7 @@ then
 fastx_clipper 
     -a $ADAPTERSEQ
     ${MIN_ADAPTOR}
-    -Q 33 
+    ${Q_PARAMETER}
     -n -v 
     -l 70 
     -i ${INIT_FILE1}
@@ -112,7 +115,7 @@ EOF
 fastx_clipper 
     -a $ADAPTERSEQ 
     ${MIN_ADAPTOR}
-    -Q 33 
+    ${Q_PARAMETER}
     -n -v 
     -l 70 
     -i ${INIT_FILE2}
@@ -139,7 +142,7 @@ then
 fastq_quality_trimmer 
     -t ${QUALITY_TRIM_T}
     -v 
-    -Q 33 
+    ${Q_PARAMETER}
     -l ${QUALITY_TRIM_L}
     -i ${INIT_FILE1}
     -o ${NEW_FILE1}
@@ -149,7 +152,7 @@ EOF
 fastq_quality_trimmer 
     -t ${QUALITY_TRIM_T}
     -v 
-    -Q 33 
+    ${Q_PARAMETER}
     -l ${QUALITY_TRIM_L}
     -i ${INIT_FILE2}
     -o ${NEW_FILE2}
