@@ -296,7 +296,7 @@ samtools index "${OUT}${SORTEDBAMFN}.bam" || exit 1
 if [ $CREATEPILEUP ]
 then
   PILEUPFN=${SORTEDBAMFN%.sorted}.pileup
-  samtools pileup -c -f "${REFERENCE}" "${OUT}${SORTEDBAMFN}.bam" \
+  samtools mpileup -f "${REFERENCE}" "${OUT}${SORTEDBAMFN}.bam" \
                       > "${OUT}${PILEUPFN}" || exit 1
   awk '( $6 >= 20 ) && ( $8 >= 20 ){ print }' "${OUT}${PILEUPFN}" \
     > "${OUT}${PILEUPFN%.pileup}.filtered.pileup" || exit 1
